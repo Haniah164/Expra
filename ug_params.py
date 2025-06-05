@@ -1,0 +1,19 @@
+# UG Params
+OFFER_SCREEN_TIME_SECONDS = 5
+OUTCOME_SCRREN_TIME_SECONDS = 1
+NUM_OF_CYCLES = 10
+NUM_OF_TRIALS_PER_CYCLE = 3
+
+# General Params
+INSTRUCTION_TYPE = ["Emotion_Focused", "Neutral"]
+
+# Agent Offers
+FAIR_AGENT = [5, 6] #Entry is ratio player recieves
+NEUTRAL_AGENT = [3, 4, 5, 6]
+UNFAIR_AGENT = [1, 2, 3]
+AGENTS = [FAIR_AGENT, NEUTRAL_AGENT, UNFAIR_AGENT]
+
+# Mood Induction Params
+MUSIC_TIME_SECONDS = 60
+IMAGES_SHOWN = 3
+IMAGES_TIME_SECONDS = 6
