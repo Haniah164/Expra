@@ -1,10 +1,15 @@
-from psychopy import visual, event, core #import some libraries from PsychoPy
+from psychopy import visual, event, core, data, gui #import some libraries from PsychoPy
 from psychopy.hardware import keyboard
 import yaml
 from pathlib import Path
 import random
 random.seed() #Initializing RNG
 timer = core.CountdownTimer() #Initializing Timer
+
+exp_info = {'participantID': ''}
+dlg = gui.DlgFromDict(dictionary=exp_info, title='Experiment Information')
+if not dlg.OK:
+    core.quit()
 
 def assignCondition():
     choice = random.choice(params.INSTRUCTION_TYPE)
@@ -17,7 +22,7 @@ CWD = Path.cwd()
 import ug_params as params
 if not (CWD / "data").exists():
     (CWD / "data").mkdir()
-out_file = (CWD / "data" / f"UG_experiment_'seed'.csv")
+#out_file = f"CWD"/"data/{exp_info['participant']}_experiment_data.csv"
 
 condition = assignCondition()
 #TODO: Initialize wristband
