@@ -1,12 +1,15 @@
-from psychopy import visual, event, core, data, gui #import some libraries from PsychoPy
+from psychopy import visual, event, core, data, gui, os #import some libraries from PsychoPy
 from psychopy.hardware import keyboard
-import yaml
+import pandas as pd
+import csv
+import moodinduction
 from pathlib import Path
 import random
 random.seed() #Initializing RNG
 timer = core.CountdownTimer() #Initializing Timer
+global_timer = core.Clock()
 
-exp_info = {'participantID': ''}
+exp_info = {'participant_id': ''}
 dlg = gui.DlgFromDict(dictionary=exp_info, title='Experiment Information')
 if not dlg.OK:
     core.quit()
@@ -17,12 +20,25 @@ def assignCondition():
     return choice
  
 #config:
-win = visual.Window([1024, 768], monitor="testMonitor", units="pix")
+win = visual.Window([1024, 768], monitor='testMonitor', units='pix')
 CWD = Path.cwd()
+trial_number = 0
 import ug_params as params
-if not (CWD / "data").exists():
-    (CWD / "data").mkdir()
-#out_file = f"CWD"/"data/{exp_info['participant']}_experiment_data.csv"
+if not (CWD / 'data').exists():
+    (CWD / 'data').mkdir()
+
+df_dict = {
+    'participant_id': [],
+    'mood': [],
+    'trial_number': [],
+    'agent_type': [],
+    'offer_value': [],
+    'choice': [],
+    'global_time': [],
+    'reaction_time': [],
+    'emotional_response': []
+}
+df = pd.DataFrame(df_dict)
 
 condition = assignCondition()
 #TODO: Initialize wristband
@@ -38,33 +54,35 @@ text_closing = visual.TextBox2(win=win, text = "Press 'q' to leave the experimen
 text_offer = visual.TextBox2(win=win, text = "/", pos=[100, 75])
 text_score = visual.TextBox2(win=win, text = "Score: 0", pos=[300, -350])
 
-#create circle 
-circle1=visual.Circle(win=win, pos=[-50, 0], radius=[5])
-circle2=visual.Circle(win=win, pos=[-40, 0], radius=[5])
-circle3=visual.Circle(win=win, pos=[-30, 0], radius=[5])
-circle4=visual.Circle(win=win, pos=[-20, 0], radius=[5])
-circle5=visual.Circle(win=win, pos=[-10, 0], radius=[5])
-circle6=visual.Circle(win=win, pos=[0, 0], radius=[5])
-circle7=visual.Circle(win=win, pos=[10, 0], radius=[5])
-circle8=visual.Circle(win=win, pos=[20, 0], radius=[5])
-circle9=visual.Circle(win=win, pos=[30, 0], radius=[5])
-circle10=visual.Circle(win=win, pos=[40, 0], radius=[5])
-circles = [circle1, circle2, circle3, circle4, circle5, circle6, circle7, circle8, circle9, circle10]
+#create circles
+circle0=visual.Circle(win=win, pos=[-50, 0], radius=[5])
+circle1=visual.Circle(win=win, pos=[-40, 0], radius=[5])
+circle2=visual.Circle(win=win, pos=[-30, 0], radius=[5])
+circle3=visual.Circle(win=win, pos=[-20, 0], radius=[5])
+circle4=visual.Circle(win=win, pos=[-10, 0], radius=[5])
+circle5=visual.Circle(win=win, pos=[0,  0], radius=[5])
+circle6=visual.Circle(win=win, pos=[10, 0], radius=[5])
+circle7=visual.Circle(win=win, pos=[20, 0], radius=[5])
+circle8=visual.Circle(win=win, pos=[30, 0], radius=[5])
+circle9=visual.Circle(win=win, pos=[40, 0], radius=[5])
+circles = [circle0, circle1, circle2, circle3, circle4, circle5, circle6, circle7, circle8, circle9]
 
 #create a keyboard component
 kb = keyboard.Keyboard()
 
-def logTrial(agent, ratio, response):
-    text_feedback = visual.TextBox2(win=win, text = "/", pos=[95, 75])
-    #TODO: Log trial in dataframe/CSV
-    if response == "Accepted":
-        text_feedback.setText("You accepted the offer and received "+str(ratio)+".")
+def logTrial(agent, ratio, response, response_time, trial_number):
+    df.loc[len(df)]=[exp_info['participant_id'], mood, trial_number, agent, ratio, response, global_timer.getTime(), response_time, '']
+    text_feedback = visual.TextBox2(win=win, text = '/', pos=[95, 75])
+    
+    trial_number = trial_number + 1
+    if response == 'Accepted':
+        text_feedback.setText('You accepted the offer and received '+str(ratio)+'.')
         text_feedback.setPos([80, 75])
     if response == "Rejected":
-        text_feedback.setText("You rejected the offer.")
+        text_feedback.setText('You rejected the offer.')
         text_feedback.setPos([120, 75])
-    if response == "Timeout":
-        text_feedback.setText("No response in time. Next offer displayed soon")
+    if response == 'Timeout':
+        text_feedback.setText('No response in time. Next offer displayed soon')
         text_feedback.setPos([40, 75])
     text_feedback.draw()
     win.flip()
@@ -77,21 +95,25 @@ score = 0 #Potentially no score?
 
 #Initiate mood induction and set emotion: (will later set emotion = ...
 #def moodInduction():
-emotion = ""
+mood = "BLANK"
 
 def mainUG():
+    mood_list = random.sample(params.MOOD_LIST, 4)
     for i in range(params.NUM_OF_CYCLES):
+        mood = mood_list[i]
+        #moodinduction.load_music(mood)
+        #music = moodinduction.play_music(mood, global_time)
         random_agents = random.sample(params.AGENTS, 3)
         
         for agent in random_agents:
             ratio = random.choice(agent)
-            text_offer.setText("You recieve "+str(ratio)+", they recieve "+str(10-ratio))
-            text_score.setText("Score: "+str(score))
+            text_offer.setText('You recieve '+str(ratio)+', they recieve '+str(10-ratio))
+            text_score.setText('Score: '+str(score))
             for x in range(10): #Providing viusal representation
                 if x+1 <= ratio:
-                    circles[x].setFillColor("Orange")
+                    circles[x].setFillColor('Orange')
                 else:
-                    circles[x].setFillColor("Black")
+                    circles[x].setFillColor('Black')
                 circles[x].draw()
             
             text_Main.draw()
@@ -111,21 +133,21 @@ def mainUG():
                 if 'q' in keys:
                     core.quit()
                 if 'n' in keys:
-                    logTrial(agent, ratio, "Rejected")
+                    logTrial(agent, ratio, 'Rejected', timer.getTime(), trial_number)
                     break
                 if 'y' in keys:
-                    logTrial(agent, ratio, "Accepted")
+                    logTrial(agent, ratio, 'Accepted', timer.getTime(), trial_number)
                     break
                 if timer.getTime() <= 0:
-                    logTrial(agent, ratio, "Timeout")
+                    logTrial(agent, ratio, 'Timeout', timer.getTime(), trial_number)
                     break
                 event.clearEvents()
+        #moodinduction.stop_music(music)
         #Start mCQ()
     
 mainUG()
-#confidenceRating()
 
-#cleanup
+data.to_csv(exp_info['participant_id']+data.getDateStr(), index=True, sep='\t')
 #stop_wristband_recording()
 #debrief()
 win.close()
