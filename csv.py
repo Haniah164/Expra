@@ -2,7 +2,7 @@ from psychopy import visual, event, core, data, gui
 import os
 import csv
 
-class CSV:
+class CSV_EXP:
     participant_id: str
     dataDir: str
     file_name: str
