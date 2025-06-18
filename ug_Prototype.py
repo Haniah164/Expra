@@ -3,6 +3,7 @@ from psychopy.hardware import keyboard
 import pandas as pd
 import csv
 import moodinduction
+import mcq
 from pathlib import Path
 import random
 random.seed() #Initializing RNG
@@ -27,18 +28,28 @@ import ug_params as params
 if not (CWD / 'data').exists():
     (CWD / 'data').mkdir()
 
+#Dataframe for UG
 df_dict = {
-    'participant_id': [],
-    'mood': [],
-    'trial_number': [],
-    'agent_type': [],
-    'offer_value': [],
-    'choice': [],
-    'global_time': [],
-    'reaction_time': [],
-    'emotional_response': []
+    'participant_id': [''],
+    'mood': [''],
+    'trial_number': [''],
+    'agent_type': [''],
+    'offer_value': [''],
+    'choice': [''],
+    'global_time': [''],
+    'reaction_time': [''],
+    'emotional_response': ['']
 }
 df = pd.DataFrame(df_dict)
+
+#Dataframe for MCQ
+df_dict_mcq = {
+    'participant_id': [''],
+    'emotion': [''],
+    'confidence': ['']
+}
+
+df_mcq = pd.DataFrame(df_dict_mcq)
 
 condition = assignCondition()
 #TODO: Initialize wristband
@@ -103,9 +114,13 @@ def mainUG():
         mood = mood_list[i]
         #moodinduction.load_music(mood)
         #music = moodinduction.play_music(mood, global_time)
-        random_agents = random.sample(params.AGENTS, 3)
-        
-        for agent in random_agents:
+        for j in range(params.NUM_OF_TRIALS_PER_CYCLE):
+            agent = random.choice(params.AGENTS)
+            agent_name = 'FAIR_AGENT'
+            if (agent[0] == 3):
+                agent_name = 'NEUTRAL_AGENT'
+            if (agent[0] == 1):
+                agent_name = 'UNFAIR_AGENT'
             ratio = random.choice(agent)
             text_offer.setText('You recieve '+str(ratio)+', they recieve '+str(10-ratio))
             text_score.setText('Score: '+str(score))
@@ -133,21 +148,22 @@ def mainUG():
                 if 'q' in keys:
                     core.quit()
                 if 'n' in keys:
-                    logTrial(agent, ratio, 'Rejected', timer.getTime(), trial_number)
+                    logTrial(agent_name, ratio, 'Rejected', timer.getTime(), trial_number)
                     break
                 if 'y' in keys:
-                    logTrial(agent, ratio, 'Accepted', timer.getTime(), trial_number)
+                    logTrial(agent_name, ratio, 'Accepted', timer.getTime(), trial_number)
                     break
                 if timer.getTime() <= 0:
-                    logTrial(agent, ratio, 'Timeout', timer.getTime(), trial_number)
+                    logTrial(agent_name, ratio, 'Timeout', timer.getTime(), trial_number)
                     break
                 event.clearEvents()
         #moodinduction.stop_music(music)
-        #Start mCQ()
+        mcq.emotion_mcq(win, df_mcq, exp_info['participant_id'])
     
 mainUG()
 
-data.to_csv(exp_info['participant_id']+data.getDateStr(), index=True, sep='\t')
+df.to_csv(exp_info['participant_id']+'-UG-'+data.getDateStr(), index=True, sep='\t')
+df_mcq.to_csv(exp_info['participant_id']+'-MCQ-'+data.getDateStr(), index=True, sep='\t')
 #stop_wristband_recording()
 #debrief()
 win.close()
