@@ -7,7 +7,7 @@ import random
 random.seed()
 
 
-def emotion_mcq(win, df, participant_id):
+def emotion_mcq(win):
     randomized_emotions = random.sample(params.EMOTIONS, k=len(params.EMOTIONS))
     print(randomized_emotions)
     #Show emotion MCQ
@@ -28,6 +28,5 @@ def emotion_mcq(win, df, participant_id):
     confidence_question.draw()
     win.flip()
     confidence_key = event.waitKeys(keyList=params.CONFIDENCE_SCALE)[0]
-
-    #Append to Dataframe
-    df.loc[len(df)]=[participant_id, selected_emotion, confidence_key]
+    
+    return selected_emotion, confidence_key
