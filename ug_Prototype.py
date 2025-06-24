@@ -1,4 +1,4 @@
-from psychopy import visual, event, core, data, gui, os #import some libraries from PsychoPy
+from psychopy import visual, event, core, data, gui, os, sound #import some libraries from PsychoPy
 from psychopy.hardware import keyboard
 import pandas as pd
 import csv
@@ -6,6 +6,7 @@ import moodinduction
 import mcq
 from pathlib import Path
 import random
+import Generate_Files
 random.seed() #Initializing RNG
 timer = core.CountdownTimer() #Initializing Timer
 global_timer = core.Clock()
@@ -24,7 +25,7 @@ def assignCondition():
     return choice
  
 #config:
-win = visual.Window([1024, 768], monitor='testMonitor', units='pix')
+win = visual.Window([1024, 768], monitor='testMonitor', units='pix', fullscr = True)
 CWD = Path.cwd()
 trial_number = 0
 import ug_params as params
@@ -63,22 +64,22 @@ text_closing = visual.TextBox2(win=win, text = "Press 'q' to leave the experimen
 text_offer = visual.TextBox2(win=win, text = "/", pos=[100, 75])
 text_score = visual.TextBox2(win=win, text = "Score: 0", pos=[300, -350])
 text_testTrial = visual.TextBox2(win=win, text = "Do you understand what you have to do in this experiment? If yes, press 's' to start the experiment. If not, either ask your supervisor or press 't' to start the test-trials again.",
-                                            pos=[0, 0])
+                                            pos=[0, 0], units='height', letterHeight=0.02)
 text_feedback = visual.TextBox2(win=win, text = '/', pos=[0, 200])
 text_introduction = visual.TextBox2(win=win, text = "In the following experiment you will play a game with another participant. In each round the other player will receive 10 Euros and has to decide how to split those between themselves and you. Then you have to decide if you want to accept the offer. If you accept, each player receives the amount that has been agreed uppon. If you decline the offer, no participant receives something. \n \nAfter a couple of rounds you will be asked a couple questions. Please answer honest. \n \nYou will now play a couple test rounds against the computer to get an idea of what the experiment is about. If you have questions, do not hesitate to ask the supervisor. Thank you for participating in our experiment. Press 't' to start the test trials.",
-                                            pos=[0, 0])
+                                            pos=[0, 0], units='height', letterHeight=0.02)
 
 #create circles
-circle0=visual.Circle(win=win, pos=[-50, 0], radius=[5])
-circle1=visual.Circle(win=win, pos=[-40, 0], radius=[5])
-circle2=visual.Circle(win=win, pos=[-30, 0], radius=[5])
-circle3=visual.Circle(win=win, pos=[-20, 0], radius=[5])
-circle4=visual.Circle(win=win, pos=[-10, 0], radius=[5])
-circle5=visual.Circle(win=win, pos=[0,  0], radius=[5])
-circle6=visual.Circle(win=win, pos=[10, 0], radius=[5])
-circle7=visual.Circle(win=win, pos=[20, 0], radius=[5])
-circle8=visual.Circle(win=win, pos=[30, 0], radius=[5])
-circle9=visual.Circle(win=win, pos=[40, 0], radius=[5])
+circle0=visual.Circle(win=win, pos=[-100, 0], radius=[5], size=2)
+circle1=visual.Circle(win=win, pos=[-80, 0], radius=[5], size=2)
+circle2=visual.Circle(win=win, pos=[-60, 0], radius=[5], size=2)
+circle3=visual.Circle(win=win, pos=[-40, 0], radius=[5], size=2)
+circle4=visual.Circle(win=win, pos=[-20, 0], radius=[5], size=2)
+circle5=visual.Circle(win=win, pos=[0,  0], radius=[5], size=2)
+circle6=visual.Circle(win=win, pos=[20, 0], radius=[5], size=2)
+circle7=visual.Circle(win=win, pos=[40, 0], radius=[5], size=2)
+circle8=visual.Circle(win=win, pos=[60, 0], radius=[5], size=2)
+circle9=visual.Circle(win=win, pos=[80, 0], radius=[5], size=2)
 circles = [circle0, circle1, circle2, circle3, circle4, circle5, circle6, circle7, circle8, circle9]
 
 #create a keyboard component
@@ -118,9 +119,22 @@ def logTrial(agent, ratio, response, response_time, trial_number):
 
 score = 0 #Potentially no score?
 
-#Initiate mood induction and set emotion: (will later set emotion = ...
 #def moodInduction():
-mood = "BLANK"
+
+
+tracks_played_this_cycle = 0
+
+track_list_sadness = ['.\Audio\rock\24.mp3', '.\Audio\pop\59.mp3', '.\Audio\rock\76.mp3', '.\Audio\rock\42.mp3']
+
+
+#TODO
+def return_audio_path(emotion):
+    Generate_Files.getEmotionDf(emotion)
+    df_tracks = pd.read_csv("track_emotions.csv')
+    tmp = df_tracks.loc[
+    return df_tracks
+    
+
 
 def testTrial_Response(response, ratio):
     if response == 'Accepted':
@@ -203,9 +217,9 @@ def testTrials():
                 return
 
 def mainUG():
-    #music = moodinduction.play_music(mood, global_time)
-    #wait 15seconds with only music TODO
-    mood_list = random.sample(params.MOOD_LIST, 4)
+    #music.play
+    core.wait(15)
+    mood_list = random.sample(params.MOOD_LIST, 3)
     for i in range(params.NUM_OF_CYCLES):
         mood = mood_list[i]
         #moodinduction.load_music(mood)
