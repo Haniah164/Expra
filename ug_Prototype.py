@@ -15,7 +15,6 @@ global_timer = core.Clock()
 # Change mainPath before experiment
 #----------------------------------------------------------------------------------
 mainPath = 'C:\\Users\\timon\OneDrive\\Dokumente\\Uni Darmstadt\\4.Semester\\Expra'
-music = sound.Sound(mainPath + return_audio_path('sadness'))
 #----------------------------------------------------------------------------------
 
 
@@ -138,6 +137,8 @@ def return_audio_path(emotion):
         track_nr = random.randint(2, 18)
         return track_list_sadness.iat[track_nr, 3]
     return None
+
+music = sound.Sound(mainPath + return_audio_path('sadness'))
 
 def testTrial_Response(response, ratio):
     if response == 'Accepted':
