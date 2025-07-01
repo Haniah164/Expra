@@ -1,0 +1,20 @@
+track_id,genre,sadness,audio_path
+47,classical,0.6470588235294118, .\Audio\classical\47.wav
+49,classical,0.6470588235294118,.\Audio\classical\49.wav
+91,classical,0.5882352941176471,.\Audio\classical\91.wav
+52,electronic,0.5454545454545454,.\Audio\electronic\52.wav
+63,electronic,0.5454545454545454,.\Audio\electronic\63.wav
+3,pop,0.42,.\Audio\pop\3.wav
+12,pop,0.38461538461538464,.\Audio\pop\12.wav
+31,pop,0.5833333333333334,.\Audio\pop\31.wav
+59,pop,0.5,.\Audio\pop\59.wav
+67,pop,0.5833333333333334,.\Audio\pop\67.wav
+97,pop,0.5454545454545454,.\Audio\pop\97.wav
+5,rock,0.4318181818181818,.\Audio\rock\5.wav
+24,rock,0.3125,.\Audio\rock\24.wav
+31,rock,0.8571428571428571,.\Audio\rock\31.wav
+41,rock,0.5,.\Audio\rock\41.wav
+42,rock,0.4666666666666667,.\Audio\rock\42.wav
+76,rock,0.6666666666666666,.\Audio\rock\76.wav
+80,rock,0.42857142857142855,.\Audio\rock\80.wav
+93,rock,0.6153846153846154,.\Audio\rock\93.wav

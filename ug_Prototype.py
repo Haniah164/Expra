@@ -1,3 +1,4 @@
+import pygame
 from psychopy import visual, event, core, data, gui, os, sound #import some libraries from PsychoPy
 from psychopy.hardware import keyboard
 import pandas as pd
@@ -10,6 +11,13 @@ import Generate_Files
 random.seed() #Initializing RNG
 timer = core.CountdownTimer() #Initializing Timer
 global_timer = core.Clock()
+
+# Change mainPath before experiment
+#----------------------------------------------------------------------------------
+mainPath = 'C:\\Users\\timon\OneDrive\\Dokumente\\Uni Darmstadt\\4.Semester\\Expra'
+music = sound.Sound(mainPath + return_audio_path('sadness'))
+#----------------------------------------------------------------------------------
+
 
 exp_info = {'participant_id': '', 'gender': ['Male', 'Female', 'Non-Binary', 'Prefer not to say'], 'age': ''}
 dlg = gui.DlgFromDict(dictionary=exp_info, title='Experiment Information')
@@ -39,7 +47,6 @@ df_dict = {
     'age': [''],
     'mood': [''],
     'trial_number': [''],
-    'agent_type': [''],
     'offer_value': [''],
     'choice': [''],
     'global_time': [''],
@@ -62,7 +69,6 @@ text_decline = visual.TextBox2(win=win, text = "Press 'n' to accept the offer.",
                                             pos=[230, -80], borderColor=["Red"], size=[250, 70])
 text_closing = visual.TextBox2(win=win, text = "Press 'q' to leave the experiment.", pos=[450, -350])
 text_offer = visual.TextBox2(win=win, text = "/", pos=[100, 75])
-text_score = visual.TextBox2(win=win, text = "Score: 0", pos=[300, -350])
 text_testTrial = visual.TextBox2(win=win, text = "Do you understand what you have to do in this experiment? If yes, press 's' to start the experiment. If not, either ask your supervisor or press 't' to start the test-trials again.",
                                             pos=[0, 0], units='height', letterHeight=0.02)
 text_feedback = visual.TextBox2(win=win, text = '/', pos=[0, 200])
@@ -92,9 +98,8 @@ saved_response = []
 saved_global_timer = []
 saved_response_time = []
 
-def logTrial(agent, ratio, response, response_time, trial_number):
+def logTrial(ratio, response, response_time, trial_number):
     saved_trial_number.append(trial_number)
-    saved_agent.append(agent)
     saved_ratio.append(ratio)
     saved_response.append(response)
     saved_global_timer.append(global_timer.getTime())
@@ -106,7 +111,7 @@ def logTrial(agent, ratio, response, response_time, trial_number):
         text_feedback.setPos([80, 75])
     if response == "Rejected":
         text_feedback.setText('You rejected the offer.')
-        text_feedback.setPos([120, 75])
+        text_feedback.setPos([150, 75])
     if response == 'Timeout':
         text_feedback.setText('No response in time. Next offer displayed soon')
         text_feedback.setPos([40, 75])
@@ -117,24 +122,22 @@ def logTrial(agent, ratio, response, response_time, trial_number):
     while timer.getTime() > 0:
         continue
 
-score = 0 #Potentially no score?
 
-#def moodInduction():
+track_list_sadness = pd.read_csv('sadness_tracks.csv')
+track_list_joy = pd.read_csv('joyful_activation_tracks.csv')
+track_list_tension = pd.read_csv('tension_tracks.csv')
 
-
-tracks_played_this_cycle = 0
-
-track_list_sadness = ['.\Audio\rock\24.mp3', '.\Audio\pop\59.mp3', '.\Audio\rock\76.mp3', '.\Audio\rock\42.mp3']
-
-
-#TODO
 def return_audio_path(emotion):
-    Generate_Files.getEmotionDf(emotion)
-    df_tracks = pd.read_csv("track_emotions.csv')
-    tmp = df_tracks.loc[
-    return df_tracks
-    
-
+    if emotion == 'tension':
+        track_nr = random.randint(2, 43)
+        return track_list_tension.iat[track_nr, 3]
+    if emotion == 'joyful_activation':
+        track_nr = random.randint(2, 92)
+        return track_list_joy.iat[track_nr, 3]
+    if emotion == 'sadness':
+        track_nr = random.randint(2, 18)
+        return track_list_sadness.iat[track_nr, 3]
+    return None
 
 def testTrial_Response(response, ratio):
     if response == 'Accepted':
@@ -154,7 +157,6 @@ def testTrial_Response(response, ratio):
         continue
 
 
-
 def testTrials():
     text_introduction.draw()
     win.flip()
@@ -163,76 +165,19 @@ def testTrials():
             keys = kb.getKeys(['t'])
             if 't' in keys:
                 break
-    mood_list = random.sample(params.MOOD_LIST, 4)
-    while True:
-        for j in range(params.NUM_OF_TRIALS_PER_CYCLE):
-            agent = random.choice(params.AGENTS)
-            agent_name = 'FAIR_AGENT'
-            if (agent[0] == 3):
-                agent_name = 'NEUTRAL_AGENT'
-            if (agent[0] == 1):
-                agent_name = 'UNFAIR_AGENT'
-            ratio = random.choice(agent)
-            text_offer.setText('You recieve '+str(ratio)+', they recieve '+str(10-ratio))
-            text_score.setText('Score: '+str(score))
-            for x in range(10): #Providing viusal representation
-                if x+1 <= ratio:
-                    circles[x].setFillColor('Orange')
-                else:
-                    circles[x].setFillColor('Black')
-                circles[x].draw()
-            
-            text_Main.draw()
-            text_accept.draw()
-            text_decline.draw()
-            text_offer.draw()
-        
-            win.flip()
-        
-            timer.reset()
-            timer.addTime(params.OFFER_SCREEN_TIME_SECONDS)
-            while True:
-                kb.clock.reset()
-                keys = kb.getKeys(['n', 'y', 'q'])
-                if 'n' in keys:
-                    testTrial_Response('Rejected', ratio)
-                    break
-                if 'y' in keys:
-                    testTrial_Response('Accepted', ratio)
-                    break
-                if timer.getTime() <= 0:
-                    testTrial_Response('Timeout', ratio)
-                    break
-                event.clearEvents()
-        selected_emotion, confidence_key = mcq.emotion_mcq(win)
-        #TODO Aks if participant understood the experiment
-        text_testTrial.draw()
+    random_blocks = random.sample(params.blocks, 4)
+    for i in range(3):
+        mood = params.MOOD_LIST[i]
+        print(mood)
+        print(return_audio_path(mood))
+        music.setSound(return_audio_path(mood))
+        music.play()
         win.flip()
-        while True:
-            kb.clock.reset()
-            keys = kb.getKeys(['t', 's'])
-            if 't' in keys:
-                break
-            if 's' in keys:
-                return
-
-def mainUG():
-    #music.play
-    core.wait(15)
-    mood_list = random.sample(params.MOOD_LIST, 3)
-    for i in range(params.NUM_OF_CYCLES):
-        mood = mood_list[i]
-        #moodinduction.load_music(mood)
+        core.wait(params.ONSET_TIME_MUSIC)
         for j in range(params.NUM_OF_TRIALS_PER_CYCLE):
-            agent = random.choice(params.AGENTS)
-            agent_name = 'FAIR_AGENT'
-            if (agent[0] == 3):
-                agent_name = 'NEUTRAL_AGENT'
-            if (agent[0] == 1):
-                agent_name = 'UNFAIR_AGENT'
-            ratio = random.choice(agent)
+            random_trials = random.sample(random_blocks[j], 4)
+            ratio = random_trials[j]
             text_offer.setText('You recieve '+str(ratio)+', they recieve '+str(10-ratio))
-            text_score.setText('Score: '+str(score))
             for x in range(10): #Providing viusal representation
                 if x+1 <= ratio:
                     circles[x].setFillColor('Orange')
@@ -245,7 +190,6 @@ def mainUG():
             text_decline.draw()
             text_closing.draw()
             text_offer.draw()
-            text_score.draw()
         
             win.flip()
         
@@ -257,13 +201,73 @@ def mainUG():
                 if 'q' in keys:
                     core.quit()
                 if 'n' in keys:
-                    logTrial(agent_name, ratio, 'Rejected', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
+                    logTrial(ratio, 'Rejected', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
                     break
                 if 'y' in keys:
-                    logTrial(agent_name, ratio, 'Accepted', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
+                    logTrial(ratio, 'Accepted', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
                     break
                 if timer.getTime() <= 0:
-                    logTrial(agent_name, ratio, 'Timeout', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
+                    logTrial(ratio, 'Timeout', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
+                    break
+                event.clearEvents()
+        selected_emotion, confidence_key = mcq.emotion_mcq(win)
+        text_testTrial.draw()
+        win.flip()
+        while True:
+            kb.clock.reset()
+            keys = kb.getKeys(['t', 's'])
+            if 't' in keys:
+                break
+            if 's' in keys:
+                return
+
+
+
+def mainUG():
+    random_blocks = random.sample(params.blocks, 4)
+    last_music_onset = global_timer.getTime()
+    for i in range(params.NUM_OF_CYCLES):
+        mood = params.MOOD_LIST[i]
+        print(mood)
+        print(return_audio_path(mood))
+        music.setSound(return_audio_path(mood))
+        music.play()
+        win.flip()
+        core.wait(params.ONSET_TIME_MUSIC)
+        for j in range(params.NUM_OF_TRIALS_PER_CYCLE):
+            random_trials = random.sample(random_blocks[j], 4)
+            ratio = random_trials[j]
+            text_offer.setText('You recieve '+str(ratio)+', they recieve '+str(10-ratio))
+            for x in range(10): #Providing viusal representation
+                if x+1 <= ratio:
+                    circles[x].setFillColor('Orange')
+                else:
+                    circles[x].setFillColor('Black')
+                circles[x].draw()
+            
+            text_Main.draw()
+            text_accept.draw()
+            text_decline.draw()
+            text_closing.draw()
+            text_offer.draw()
+        
+            win.flip()
+        
+            timer.reset()
+            timer.addTime(params.OFFER_SCREEN_TIME_SECONDS)
+            while True:
+                kb.clock.reset()
+                keys = kb.getKeys(['n', 'y', 'q'])
+                if 'q' in keys:
+                    core.quit()
+                if 'n' in keys:
+                    logTrial(ratio, 'Rejected', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
+                    break
+                if 'y' in keys:
+                    logTrial(ratio, 'Accepted', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
+                    break
+                if timer.getTime() <= 0:
+                    logTrial(ratio, 'Timeout', params.OFFER_SCREEN_TIME_SECONDS-timer.getTime(), trial_number)
                     break
                 event.clearEvents()
         #moodinduction.stop_music(music)
@@ -271,7 +275,7 @@ def mainUG():
         #log results in dataframe
         for trial in range(params.NUM_OF_TRIALS_PER_CYCLE):
             df.loc[len(df)]=[exp_info['participant_id'], exp_info['gender'], exp_info['age'], saved_trial_number[trial],
-            mood, saved_agent[trial], saved_ratio[trial], saved_response[trial], saved_global_timer[trial], saved_response_time[trial], '',
+            mood, saved_ratio[trial], saved_response[trial], saved_global_timer[trial], saved_response_time[trial], '',
             selected_emotion, confidence_key]
     
 testTrials()
