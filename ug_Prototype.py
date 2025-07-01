@@ -45,19 +45,17 @@ df_dict = {
     'gender': [''],
     'age': [''],
     'mood': [''],
-    'trial_number': [''],
     'offer_value': [''],
     'choice': [''],
     'global_time': [''],
     'reaction_time': [''],
-    'emotional_response': [''],
     'selected_emotion': [''],
     'confidence_key': ['']
 }
 df = pd.DataFrame(df_dict)
 
 condition = assignCondition()
-#TODO: Initialize wristband
+
 
 #create main textbox
 text_Main = visual.TextBox2(win=win, text = "Read the proposed offer carefully and decide if you want to accept:",
@@ -90,7 +88,6 @@ circles = [circle0, circle1, circle2, circle3, circle4, circle5, circle6, circle
 #create a keyboard component
 kb = keyboard.Keyboard()
 
-saved_trial_number = []
 saved_agent = []
 saved_ratio = []
 saved_response = []
@@ -98,13 +95,11 @@ saved_global_timer = []
 saved_response_time = []
 
 def logTrial(ratio, response, response_time, trial_number):
-    saved_trial_number.append(trial_number)
     saved_ratio.append(ratio)
     saved_response.append(response)
     saved_global_timer.append(global_timer.getTime())
     saved_response_time.append(response_time)
     
-    trial_number = trial_number + 1
     if response == 'Accepted':
         text_feedback.setText('You accepted the offer and received '+str(ratio)+'.')
         text_feedback.setPos([80, 75])
@@ -275,11 +270,11 @@ def mainUG():
         selected_emotion, confidence_key = mcq.emotion_mcq(win)
         #log results in dataframe
         for trial in range(params.NUM_OF_TRIALS_PER_CYCLE):
-            df.loc[len(df)]=[exp_info['participant_id'], exp_info['gender'], exp_info['age'], saved_trial_number[trial],
-            mood, saved_ratio[trial], saved_response[trial], saved_global_timer[trial], saved_response_time[trial], '',
+            df.loc[len(df)]=[exp_info['participant_id'], exp_info['gender'], exp_info['age'],
+            mood, saved_ratio[trial], saved_response[trial], saved_global_timer[trial], saved_response_time[trial],
             selected_emotion, confidence_key]
     
-testTrials()
+#testTrials()
 mainUG()
 
 df.to_csv(exp_info['participant_id']+'-UG-'+data.getDateStr(), index=True, sep='\t')
