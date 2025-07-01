@@ -123,13 +123,13 @@ track_list_tension = pd.read_csv('tension_tracks.csv')
 
 def return_audio_path(emotion):
     if emotion == 'tension':
-        track_nr = random.randint(2, 43)
+        track_nr = random.randint(2, 12)
         return track_list_tension.iat[track_nr, 3]
     if emotion == 'joyful_activation':
-        track_nr = random.randint(2, 92)
+        track_nr = random.randint(2, 10)
         return track_list_joy.iat[track_nr, 3]
     if emotion == 'sadness':
-        track_nr = random.randint(2, 18)
+        track_nr = random.randint(2, 11)
         return track_list_sadness.iat[track_nr, 3]
     return None
 
